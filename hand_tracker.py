@@ -4,13 +4,13 @@ Air-Drawing Starter - Phase 0-2 (MediaPipe Tasks API, "Path B")
 Opens your webcam, detects one hand, and draws the 21-landmark skeleton.
 This is the known-good base; gestures and painting (Phase 3+) build on top.
 
-Setup (do this once):
-    python -m venv venv
-    # activate it:  source venv/bin/activate   (mac/linux)
-    #               venv\Scripts\activate       (windows)
-    pip install opencv-python mediapipe numpy
+Run (mac/linux):
+    ./run.sh        # creates the venv + installs deps on first run, then launches
 
-Run:
+Or manually:
+    python -m venv venv
+    source venv/bin/activate            # windows: venv\Scripts\activate
+    pip install opencv-python mediapipe numpy
     python hand_tracker.py
 
 The first run auto-downloads the model file (~7 MB) into this folder.
