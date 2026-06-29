@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Drawer</title>
+  <style>
+    :root { color-scheme: dark; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: #0c0b0a;
+      color: #eaeaea;
+      font: 15px/1.4 system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+      overflow: hidden;
+    }
+    #stage {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+    }
+    canvas#view {
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      background: #000;
+    }
+    #overlay {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 24px;
+      background: radial-gradient(transparent, rgba(0, 0, 0, 0.4));
+      pointer-events: none;
+    }
+    #overlay .card {
+      max-width: 520px;
+      pointer-events: auto;
+    }
+    h1 { font-weight: 600; letter-spacing: 0.5px; margin: 0 0 8px; }
+    p  { color: #b0b0b0; margin: 6px 0; }
+    button {
+      margin-top: 16px;
+      padding: 10px 22px;
+      font: inherit;
+      color: #0c0b0a;
+      background: rgb(180, 230, 255);
+      border: 0;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+    button:disabled { opacity: 0.5; cursor: default; }
+    .hidden { display: none !important; }
+    .err { color: rgb(240, 120, 120); }
+  </style>
+</head>
+<body>
+  <div id="stage"><canvas id="view"></canvas></div>
+
+  <div id="overlay">
+    <div class="card">
+      <button id="start">Enable camera</button>
+      <p id="status"></p>
+    </div>
+  </div>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
