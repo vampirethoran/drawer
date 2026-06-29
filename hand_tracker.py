@@ -256,7 +256,7 @@ def draw_width_meter(frame, text_renderer, anchor_xy, amount, width_px):
     cv2.circle(frame, (fill_x, by), 5, ACCENT_BRIGHT, -1, cv2.LINE_AA)
 
 
-def draw_hud(frame, text_renderer, fps, status):
+def draw_hud(frame, text_renderer, fps):
     w = frame.shape[1]
     text_renderer.add((w - 30, 35), f"{fps:4.1f} fps   ·   c clear   ·   q quit",
                       size=14, color=MUTED, anchor="rm")
@@ -372,13 +372,7 @@ def main():
             fps = 1.0 / (now - state.prev_time) if now != state.prev_time else 0.0
             state.prev_time = now
 
-            if right is None and left is None:
-                status = "show me a hand"
-            elif right is None:
-                status = "right hand draws · left hand sets width"
-            else:
-                status = "drawing" if drawing else "point to draw"
-            draw_hud(frame, text, fps, status)
+            draw_hud(frame, text, fps)
 
             text.flush(frame)
 
