@@ -1,6 +1,6 @@
 # Hand Tracker
 
-Webcam hand tracking that draws the 21-point hand skeleton.
+Webcam hand tracking that lets you draw on screen with your index finger.
 
 ## Run
 
@@ -12,7 +12,14 @@ That's it. On the first run it creates a virtual environment and installs the
 dependencies (`opencv-python`, `mediapipe`, `numpy`); after that it just
 launches the app.
 
-Press `q` (with the video window focused) to quit.
+## Drawing
+
+Point with your **index finger** (other fingers curled) to draw. The fingertip
+marker turns into a green ring while drawing. Open or lower your index finger to
+lift the pen and reposition without leaving a line.
+
+- `c` — clear the canvas
+- `q` — quit (with the video window focused)
 
 ### Windows
 

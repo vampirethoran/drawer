@@ -1,28 +1,10 @@
-r"""
-Air-Drawing Starter - Phase 0-2 (MediaPipe Tasks API, "Path B")
-================================================================
-Opens your webcam, detects one hand, and draws the 21-landmark skeleton.
-This is the known-good base; gestures and painting (Phase 3+) build on top.
-
-Run (mac/linux):
-    ./run.sh        # creates the venv + installs deps on first run, then launches
-
-Or manually:
-    python -m venv venv
-    source venv/bin/activate            # windows: venv\Scripts\activate
-    pip install opencv-python mediapipe numpy
-    python hand_tracker.py
-
-The first run auto-downloads the model file (~7 MB) into this folder.
-Press 'q' (with the video window focused) to quit.
-"""
-
 import os
 import sys
 import time
 import urllib.request
 
 import cv2
+import numpy as np
 import mediapipe as mp
 from mediapipe.tasks import python as mp_python
 from mediapipe.tasks.python import vision
@@ -43,7 +25,35 @@ HAND_CONNECTIONS = [
     (0, 17),                                 # base of palm
 ]
 
-INDEX_TIP = 8  # the landmark you'll "paint" with in later phases
+INDEX_TIP = 8  # the landmark you "paint" with
+
+# Pose detection: a finger is "extended" when its tip is farther from the wrist
+# than its PIP joint. This is rotation-invariant, so it works at any hand angle.
+WRIST = 0
+FINGER_TIPS = {"index": 8, "middle": 12, "ring": 16, "pinky": 20}
+FINGER_PIPS = {"index": 6, "middle": 10, "ring": 14, "pinky": 18}
+
+# Brush settings.
+BRUSH_COLOR = (0, 0, 255)  # BGR red
+BRUSH_SIZE = 6
+SMOOTHING = 0.5  # EMA alpha: higher = snappier, lower = smoother
+
+
+def _finger_extended(landmarks, tip, pip):
+    """True if the fingertip is farther from the wrist than its PIP joint."""
+    wx, wy = landmarks[WRIST].x, landmarks[WRIST].y
+    d = lambda i: (landmarks[i].x - wx) ** 2 + (landmarks[i].y - wy) ** 2
+    return d(tip) > d(pip)
+
+
+def is_pointing(landmarks):
+    """True when index is extended and middle/ring/pinky are curled."""
+    index_up = _finger_extended(landmarks, 8, 6)
+    others_down = not any(
+        _finger_extended(landmarks, FINGER_TIPS[f], FINGER_PIPS[f])
+        for f in ("middle", "ring", "pinky")
+    )
+    return index_up and others_down
 
 
 def ensure_model():
@@ -68,8 +78,7 @@ def make_landmarker(model_path):
     return vision.HandLandmarker.create_from_options(options)
 
 
-def draw_hand(frame, landmarks):
-    """Draw the skeleton for one hand onto the (already-mirrored) frame."""
+def draw_hand(frame, landmarks, drawing=False):
     h, w = frame.shape[:2]
     # landmark coords are normalized 0..1 -> scale to pixels
     pts = [(int(lm.x * w), int(lm.y * h)) for lm in landmarks]
@@ -77,8 +86,11 @@ def draw_hand(frame, landmarks):
         cv2.line(frame, pts[a], pts[b], (0, 200, 255), 2)
     for (x, y) in pts:
         cv2.circle(frame, (x, y), 4, (255, 255, 255), -1)
-    # highlight the index fingertip - this becomes your brush tip later
-    cv2.circle(frame, pts[INDEX_TIP], 9, (0, 0, 255), -1)
+    # highlight the index fingertip: green ring while drawing, red dot otherwise
+    if drawing:
+        cv2.circle(frame, pts[INDEX_TIP], 11, (0, 255, 0), 2)
+    else:
+        cv2.circle(frame, pts[INDEX_TIP], 9, (0, 0, 255), -1)
 
 
 def main():
@@ -86,16 +98,16 @@ def main():
     landmarker = make_landmarker(model_path)
 
     cap = cv2.VideoCapture(0)
-    # Windows tip: if the window is black or startup is slow, use:
-    #   cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
-    # If nothing opens, try index 1 instead of 0.
     if not cap.isOpened():
         print("Could not open the webcam. Try index 1, and check camera "
               "permissions for your terminal / editor.")
         sys.exit(1)
 
-    last_ts = -1          # detect_for_video needs strictly increasing timestamps
+    last_ts = -1
     prev_time = time.time()
+
+    canvas = None          # persistent stroke layer, created on the first frame
+    prev_pt = None         # last smoothed pixel point (None == pen up)
 
     try:
         while True:
@@ -105,6 +117,8 @@ def main():
                 continue
 
             frame = cv2.flip(frame, 1)                  # mirror like a selfie cam
+            if canvas is None:
+                canvas = np.zeros_like(frame)
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # MediaPipe wants RGB
             mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb)
 
@@ -115,23 +129,47 @@ def main():
 
             result = landmarker.detect_for_video(mp_image, ts)
 
+            drawing = False
             if result.hand_landmarks:
-                for hand in result.hand_landmarks:
-                    draw_hand(frame, hand)
-                status = "hand detected"
+                hand = result.hand_landmarks[0]
+                if is_pointing(hand):
+                    drawing = True
+                    h, w = frame.shape[:2]
+                    raw = (int(hand[INDEX_TIP].x * w), int(hand[INDEX_TIP].y * h))
+                    if prev_pt is None:
+                        prev_pt = raw            # pen just went down: no line yet
+                    else:
+                        sm = (int(SMOOTHING * raw[0] + (1 - SMOOTHING) * prev_pt[0]),
+                              int(SMOOTHING * raw[1] + (1 - SMOOTHING) * prev_pt[1]))
+                        cv2.line(canvas, prev_pt, sm, BRUSH_COLOR, BRUSH_SIZE,
+                                 cv2.LINE_AA)
+                        prev_pt = sm
+                else:
+                    prev_pt = None               # pen up: break the stroke
+                draw_hand(frame, hand, drawing)
+                status = "DRAW" if drawing else "hover"
             else:
+                prev_pt = None
                 status = "show me a hand"
+
+            # composite strokes opaquely over the video (video shows through gaps)
+            mask = canvas.any(axis=2)
+            frame[mask] = canvas[mask]
 
             now = time.time()
             fps = 1.0 / (now - prev_time) if now != prev_time else 0.0
             prev_time = now
 
-            cv2.putText(frame, f"{status}  |  {fps:4.1f} fps  |  press q to quit",
+            cv2.putText(frame, f"{status}  |  {fps:4.1f} fps  |  c clear  q quit",
                         (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
 
-            cv2.imshow("Hand Tracker - Phase 0-2", frame)
-            if cv2.waitKey(1) & 0xFF == ord("q"):
+            cv2.imshow("Hand Tracker - Draw", frame)
+            key = cv2.waitKey(1) & 0xFF
+            if key == ord("q"):
                 break
+            if key == ord("c"):
+                canvas[:] = 0
+                prev_pt = None
     finally:
         landmarker.close()
         cap.release()
