@@ -104,7 +104,7 @@ function frostedPanel(ctx, x1, y1, x2, y2, radius = 16, alpha = PANEL_ALPHA) {
 }
 
 function text(ctx, x, y, str, size = 22, color = INK, anchor = "left", baseline = "alphabetic") {
-  ctx.font = `${size}px system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif`;
+  ctx.font = `${size}px "Funnel Display", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif`;
   ctx.fillStyle = color;
   ctx.textAlign = anchor;
   ctx.textBaseline = baseline;
@@ -161,7 +161,7 @@ function drawPinchLink(ctx, lm, w, h) {
 }
 
 function drawLabelChip(ctx, anchor, label, w, h, active) {
-  const size = 20, padX = 12, padY = 7;
+  const size = 16, padX = 12, padY = 7;
   const tw = Math.round(label.length * size * 0.58) + padX * 2;
   const th = size + padY * 2;
   const x = clamp(0, w - tw, anchor[0] + 16);
@@ -183,8 +183,8 @@ function drawWidthMeter(ctx, anchor, amount, widthPx, w, h) {
   const y = clamp(0, h - panelH, anchor[1] - panelH / 2);
   frostedPanel(ctx, x, y, x + panelW, y + panelH, 16);
 
-  text(ctx, x + 16, y + 14, "BRUSH", 14, MUTED, "left", "middle");
-  text(ctx, x + panelW - 16, y + 14, `${Math.round(widthPx)} px`, 16, INK, "right", "middle");
+  text(ctx, x + 16, y + 14, "BRUSH", 12, MUTED, "left", "middle");
+  text(ctx, x + panelW - 16, y + 14, `${Math.round(widthPx)} px`, 13, INK, "right", "middle");
 
   const bx1 = x + 16, bx2 = x + panelW - 16, by = y + 40;
   ctx.lineCap = "round";
@@ -200,7 +200,7 @@ function drawWidthMeter(ctx, anchor, amount, widthPx, w, h) {
 }
 
 function drawHud(ctx, fps, w) {
-  text(ctx, w - 30, 35, `${fps.toFixed(1)} fps   ·   c clear`, 14, MUTED, "right", "middle");
+  text(ctx, w - 30, 35, `${fps.toFixed(1)} fps   ·   c clear`, 12, MUTED, "right", "middle");
 }
 
 // --- app -------------------------------------------------------------------
@@ -281,6 +281,9 @@ async function start() {
 
   const w = video.videoWidth, h = video.videoHeight;
   for (const c of [view, proc, strokes]) { c.width = w; c.height = h; }
+
+  // make sure the canvas UI renders in Funnel Display from the first frame
+  try { await document.fonts.load('600 16px "Funnel Display"'); } catch {}
 
   overlay.classList.add("hidden");
   requestAnimationFrame(loop);
