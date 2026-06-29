@@ -13,6 +13,22 @@ That's it. On the first run it creates a virtual environment and installs the
 dependencies (`opencv-python`, `mediapipe`, `numpy`, `pillow`); after that it
 just launches the app.
 
+## Run in the browser
+
+There's also a pure-browser version in [`web/`](web/) — same hand tracking,
+same model, but it runs entirely client-side via MediaPipe Tasks Vision. The
+camera feed never leaves the device.
+
+```bash
+web/serve.sh        # http://localhost:8000/web/
+```
+
+Open the URL, click **Enable camera**, and draw. It needs to be served over
+`http://localhost` (or HTTPS) — the camera and ES modules won't work from a
+`file://` page. Locally it reuses the `hand_landmarker.task` at the repo root;
+when deployed without it (GitHub Pages, Netlify, Vercel) it falls back to
+fetching the model from the CDN. Press **c** to clear.
+
 ## How it works
 
 - **Right hand — the drawing hand.** Point with your **index finger** (other
