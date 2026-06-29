@@ -103,8 +103,12 @@ function frostedPanel(ctx, x1, y1, x2, y2, radius = 16, alpha = PANEL_ALPHA) {
   ctx.restore();
 }
 
-function text(ctx, x, y, str, size = 22, color = INK, anchor = "left", baseline = "alphabetic") {
+function setFont(ctx, size) {
   ctx.font = `${size}px "Funnel Display", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif`;
+}
+
+function text(ctx, x, y, str, size = 22, color = INK, anchor = "left", baseline = "alphabetic") {
+  setFont(ctx, size);
   ctx.fillStyle = color;
   ctx.textAlign = anchor;
   ctx.textBaseline = baseline;
@@ -161,8 +165,12 @@ function drawPinchLink(ctx, lm, w, h) {
 }
 
 function drawLabelChip(ctx, anchor, label, w, h, active) {
-  const size = 16, padX = 12, padY = 7;
-  const tw = Math.round(label.length * size * 0.58) + padX * 2;
+  const size = 12, padX = 10, padY = 6;
+  const dotR = size * 0.33;
+  const dotGap = active ? dotR * 2 + 6 : 0;   // dot + spacing, only when active
+  setFont(ctx, size);
+  const textW = ctx.measureText(label).width;
+  const tw = Math.round(padX * 2 + dotGap + textW);
   const th = size + padY * 2;
   const x = clamp(0, w - tw, anchor[0] + 16);
   const y = clamp(0, h - th, anchor[1] - th - 8);
@@ -170,10 +178,10 @@ function drawLabelChip(ctx, anchor, label, w, h, active) {
   if (active) {
     ctx.fillStyle = ACCENT_BRIGHT;
     ctx.beginPath();
-    ctx.arc(x + padX / 2 + 4, y + th / 2, 4, 0, Math.PI * 2);
+    ctx.arc(x + padX + dotR, y + th / 2, dotR, 0, Math.PI * 2);
     ctx.fill();
   }
-  text(ctx, x + padX + (active ? 10 : 0), y + th / 2, label, size,
+  text(ctx, x + padX + dotGap, y + th / 2, label, size,
        active ? ACCENT_BRIGHT : MUTED, "left", "middle");
 }
 
@@ -183,8 +191,8 @@ function drawWidthMeter(ctx, anchor, amount, widthPx, w, h) {
   const y = clamp(0, h - panelH, anchor[1] - panelH / 2);
   frostedPanel(ctx, x, y, x + panelW, y + panelH, 16);
 
-  text(ctx, x + 16, y + 14, "BRUSH", 12, MUTED, "left", "middle");
-  text(ctx, x + panelW - 16, y + 14, `${Math.round(widthPx)} px`, 13, INK, "right", "middle");
+  text(ctx, x + 16, y + 14, "BRUSH", 10, MUTED, "left", "middle");
+  text(ctx, x + panelW - 16, y + 14, `${Math.round(widthPx)} px`, 11, INK, "right", "middle");
 
   const bx1 = x + 16, bx2 = x + panelW - 16, by = y + 40;
   ctx.lineCap = "round";
