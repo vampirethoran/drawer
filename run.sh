@@ -9,7 +9,7 @@ if [ ! -d venv ]; then
     echo "First run: creating venv and installing dependencies..."
     python3 -m venv venv
     venv/bin/pip install --upgrade pip
-    venv/bin/pip install opencv-python mediapipe numpy
+    venv/bin/pip install opencv-python mediapipe numpy pillow
 fi
 
 exec venv/bin/python hand_tracker.py
