@@ -1,0 +1,30 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "draw",
+  "compatibility_date": "2026-06-29",
+
+  // Everything in web/ is served at the site root (web/index.html -> "/").
+  "assets": {
+    "directory": "./web"
+  },
+
+  "routes": [
+    { "pattern": "draw.thoran.art", "custom_domain": true }
+  ],
+
+  "observability": {
+    "enabled": false,
+    "head_sampling_rate": 1,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "persist": true,
+      "invocation_logs": true
+    },
+    "traces": {
+      "enabled": false,
+      "persist": true,
+      "head_sampling_rate": 1
+    }
+  }
+}
