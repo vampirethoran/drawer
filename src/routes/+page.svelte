@@ -40,8 +40,9 @@
 {#if hud.phase !== 'running'}
 	<StartOverlay onenable={enable} />
 {:else}
-	<HintBar />
 	<div class="pointer-events-none fixed bottom-6 left-1/2 z-10 -translate-x-1/2">
 		<ControlPill label="clear" onclick={clear} />
 	</div>
 {/if}
+
+<HintBar />
