@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { Tracker } from '$lib/tracking/tracker';
 	import { downloadBlob } from '$lib/download';
+	import { actionDefs, type ActionId } from '$lib/actions';
 	import { hud } from '$lib/state.svelte';
 	import StartOverlay from '$lib/components/StartOverlay.svelte';
 	import HintBar from '$lib/components/HintBar.svelte';
@@ -37,9 +38,14 @@
 		);
 	}
 
+	const run: Record<ActionId, () => void> = {
+		save: exportDrawing,
+		clear
+	};
+
 	function onKey(e: KeyboardEvent) {
-		if (e.key === 'c') clear();
-		if (e.key === 's') exportDrawing();
+		const action = actionDefs.find((a) => a.key === e.key);
+		if (action) run[action.id]();
 	}
 </script>
 
@@ -58,4 +64,4 @@
 {/if}
 
 <HintBar />
-<TouchControls onsave={exportDrawing} onclear={clear} />
+<TouchControls onaction={(id) => run[id]()} />

@@ -1,13 +1,9 @@
 <script lang="ts">
 	import { hud, isRunning } from '$lib/state.svelte';
+	import { actionDefs } from '$lib/actions';
 	import LiveHint from '$lib/components/LiveHint.svelte';
 
 	type Shortcut = { key: string; label: string };
-
-	const shortcuts: Shortcut[] = [
-		{ key: 's', label: 'save' },
-		{ key: 'c', label: 'clear' }
-	];
 </script>
 
 {#snippet shortcutHints(items: Shortcut[])}
@@ -27,7 +23,7 @@
 	<div class="flex-1"><LiveHint /></div>
 	<div class="hidden flex-1 justify-center md:flex">
 		{#if isRunning()}
-			{@render shortcutHints(shortcuts)}
+			{@render shortcutHints(actionDefs)}
 		{/if}
 	</div>
 	<div class="flex-1 text-right">
