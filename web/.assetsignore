@@ -1,2 +1,0 @@
-# Files in web/ that should NOT be uploaded as worker assets.
-serve.sh

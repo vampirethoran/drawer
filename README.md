@@ -1,33 +1,28 @@
 # Drawer
 
 Webcam hand tracking that lets you draw on screen — two-handed, with a clean
-minimal UI.
-
-## Run
-
-```bash
-./run.sh
-```
-
-That's it. On the first run it creates a virtual environment and installs the
-dependencies (`opencv-python`, `mediapipe`, `numpy`, `pillow`); after that it
-just launches the app.
-
-## Run in the browser
-
-There's also a pure-browser version in [`web/`](web/) — same hand tracking,
-same model, but it runs entirely client-side via MediaPipe Tasks Vision. The
+minimal UI. A [SvelteKit](https://svelte.dev/docs/kit) app that runs entirely
+client-side via MediaPipe Tasks Vision, deployed on Cloudflare Workers. The
 camera feed never leaves the device.
 
+Live at **[draw.thoran.art](https://draw.thoran.art)**.
+
+## Develop
+
 ```bash
-web/serve.sh        # http://localhost:8000/web/
+pnpm install
+pnpm dev            # http://localhost:5173
 ```
 
-Open the URL, click **Enable camera**, and draw. It needs to be served over
-`http://localhost` (or HTTPS) — the camera and ES modules won't work from a
-`file://` page. Locally it reuses the `hand_landmarker.task` at the repo root;
-when deployed without it (GitHub Pages, Netlify, Vercel) it falls back to
-fetching the model from the CDN. Press **c** to clear.
+Open the URL, click **Enable camera**, and draw. The camera needs a secure
+context, so use `http://localhost` (or HTTPS). The hand-landmark model and the
+MediaPipe WASM runtime are fetched from a CDN — nothing to download by hand.
+
+## Deploy
+
+```bash
+pnpm deploy         # builds, then wrangler deploy → draw.thoran.art
+```
 
 ## How it works
 
@@ -44,18 +39,3 @@ Both hands are tracked at once, so you can draw with the right and adjust width
 with the left simultaneously.
 
 - `c` — clear the canvas
-- `q` — quit (with the video window focused)
-
-If your left/right hands come out swapped on your machine, flip
-`SWAP_HANDEDNESS = True` near the top of `hand_tracker.py`.
-
-### Windows
-
-`run.sh` is a bash script, so on Windows run the steps manually:
-
-```bash
-python -m venv venv
-venv\Scripts\activate
-pip install opencv-python mediapipe numpy pillow
-python hand_tracker.py
-```
