@@ -5,6 +5,7 @@
 	import { hud } from '$lib/state.svelte';
 	import StartOverlay from '$lib/components/StartOverlay.svelte';
 	import HintBar from '$lib/components/HintBar.svelte';
+	import TouchControls from '$lib/components/TouchControls.svelte';
 
 	let view: HTMLCanvasElement;
 	let tracker: Tracker | null = null;
@@ -57,3 +58,4 @@
 {/if}
 
 <HintBar />
+<TouchControls onsave={exportDrawing} onclear={clear} />

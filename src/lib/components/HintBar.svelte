@@ -25,7 +25,7 @@
 	class="pointer-events-none fixed inset-x-6 top-4 z-10 flex items-center text-sm tracking-wide text-muted tabular-nums"
 >
 	<div class="flex-1"><LiveHint /></div>
-	<div class="flex flex-1 justify-center">
+	<div class="hidden flex-1 justify-center md:flex">
 		{#if isRunning()}
 			{@render shortcutHints(shortcuts)}
 		{/if}
