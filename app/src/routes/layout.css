@@ -1,1 +1,39 @@
 @import 'tailwindcss';
+
+/* Single source of truth for the palette. @theme emits these as :root custom
+   properties AND generates utilities (text-accent, bg-panel, …). The DOM uses
+   the utilities; the canvas reads the same variables at runtime via
+   $lib/tracking/palette. Keep names in sync with Palette there.
+   (Python's BGR tuples, converted to CSS RGB.) */
+@theme {
+	--color-ink: rgb(250 250 250);
+	--color-muted: rgb(190 190 190);
+	--color-accent: rgb(180 230 255);
+	--color-brush: rgb(240 80 90);
+	--color-skeleton: rgb(120 140 150);
+	--color-joint: rgb(220 220 220);
+	--color-panel: rgb(28 30 35);
+	--color-meter: rgb(80 85 90);
+	--color-error: rgb(240 120 120);
+	--color-bg: rgb(12 11 10);
+}
+
+:root {
+	color-scheme: dark;
+}
+
+html,
+body {
+	margin: 0;
+	height: 100%;
+	background: var(--color-bg);
+	color: #eaeaea;
+	font:
+		13px/1.4 'Funnel Display',
+		system-ui,
+		-apple-system,
+		'Helvetica Neue',
+		Arial,
+		sans-serif;
+	overflow: hidden;
+}
