@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Tracker } from '$lib/tracking/tracker';
+	import { downloadBlob } from '$lib/download';
 	import { hud } from '$lib/state.svelte';
 	import StartOverlay from '$lib/components/StartOverlay.svelte';
 	import HintBar from '$lib/components/HintBar.svelte';
@@ -22,8 +23,23 @@
 		tracker?.clear();
 	}
 
+	async function exportDrawing() {
+		const blob = await tracker?.capture();
+		if (blob) downloadBlob(blob, `drawer-${timestamp()}.png`);
+	}
+
+	function timestamp(): string {
+		const d = new Date();
+		const p = (n: number) => String(n).padStart(2, '0');
+		return (
+			`${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}-` +
+			`${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`
+		);
+	}
+
 	function onKey(e: KeyboardEvent) {
 		if (e.key === 'c') clear();
+		if (e.key === 's') exportDrawing();
 	}
 </script>
 
@@ -40,7 +56,8 @@
 {#if hud.phase !== 'running'}
 	<StartOverlay onenable={enable} />
 {:else}
-	<div class="pointer-events-none fixed bottom-6 left-1/2 z-10 -translate-x-1/2">
+	<div class="pointer-events-none fixed bottom-6 left-1/2 z-10 flex -translate-x-1/2 gap-2">
+		<ControlPill label="save" onclick={exportDrawing} />
 		<ControlPill label="clear" onclick={clear} />
 	</div>
 {/if}

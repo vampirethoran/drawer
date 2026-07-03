@@ -4,7 +4,10 @@
 
 	type Shortcut = { key: string; label: string };
 
-	const shortcuts: Shortcut[] = [{ key: 'c', label: 'clear' }];
+	const shortcuts: Shortcut[] = [
+		{ key: 's', label: 'save' },
+		{ key: 'c', label: 'clear' }
+	];
 </script>
 
 {#snippet shortcutHints(items: Shortcut[])}

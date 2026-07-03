@@ -127,6 +127,16 @@ export class Tracker {
 		this.prevPt = null;
 	}
 
+	capture(): Promise<Blob | null> {
+		const out = document.createElement('canvas');
+		out.width = this.view.width;
+		out.height = this.view.height;
+		const ctx = mustCtx(out);
+		ctx.drawImage(this.proc, 0, 0); // full-brightness webcam, no dim
+		ctx.drawImage(this.strokes, 0, 0); // paint overlay
+		return new Promise((resolve) => out.toBlob(resolve, 'image/png'));
+	}
+
 	/** Stop the loop, release the camera and free the model. */
 	stop(): void {
 		cancelAnimationFrame(this.raf);
