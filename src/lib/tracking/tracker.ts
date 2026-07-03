@@ -27,7 +27,7 @@ const MODEL_CDN =
 	'https://storage.googleapis.com/mediapipe-models/hand_landmarker/' +
 	'hand_landmarker/float16/1/hand_landmarker.task';
 
-const FPS_UPDATE_MS = 250; // throttle DOM fps writes so the readout doesn't strobe
+const FPS_UPDATE_MS = 750; // throttle DOM fps writes so the readout doesn't strobe
 
 async function createLandmarker(): Promise<HandLandmarker> {
 	const vision = await FilesetResolver.forVisionTasks(WASM_CDN);
