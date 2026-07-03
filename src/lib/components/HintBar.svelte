@@ -11,7 +11,7 @@
 </script>
 
 {#snippet shortcutHints(items: Shortcut[])}
-	<div class="flex gap-3">
+	<div class="flex gap-7">
 		{#each items as { key, label } (key)}
 			<span class="flex items-center gap-1.5">
 				<kbd class="rounded-sm border border-muted/40 px-1.5 py-0.5 uppercase">{key}</kbd>
@@ -22,7 +22,7 @@
 {/snippet}
 
 <div
-	class="pointer-events-none fixed inset-x-6 top-4 z-10 flex items-center text-xs tracking-wide text-muted tabular-nums"
+	class="pointer-events-none fixed inset-x-6 top-4 z-10 flex items-center text-sm tracking-wide text-muted tabular-nums"
 >
 	<div class="flex-1"><LiveHint /></div>
 	<div class="flex flex-1 justify-center">

@@ -5,7 +5,6 @@
 	import { hud } from '$lib/state.svelte';
 	import StartOverlay from '$lib/components/StartOverlay.svelte';
 	import HintBar from '$lib/components/HintBar.svelte';
-	import ControlPill from '$lib/components/ControlPill.svelte';
 
 	let view: HTMLCanvasElement;
 	let tracker: Tracker | null = null;
@@ -55,11 +54,6 @@
 
 {#if hud.phase !== 'running'}
 	<StartOverlay onenable={enable} />
-{:else}
-	<div class="pointer-events-none fixed bottom-6 left-1/2 z-10 flex -translate-x-1/2 gap-2">
-		<ControlPill label="save" onclick={exportDrawing} />
-		<ControlPill label="clear" onclick={clear} />
-	</div>
 {/if}
 
 <HintBar />
