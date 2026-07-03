@@ -18,7 +18,7 @@ pnpm preview        # run the built worker locally on :4173
 pnpm check          # wrangler types + svelte-kit sync + svelte-check (typecheck)
 pnpm lint           # prettier --check . && eslint .
 pnpm format         # prettier --write .
-pnpm deploy         # build, then wrangler deploy → draw.thoran.art
+pnpm release        # build, then wrangler deploy → draw.thoran.art
 pnpm gen            # regenerate worker-configuration.d.ts (wrangler types)
 ```
 
