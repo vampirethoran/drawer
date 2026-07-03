@@ -15,19 +15,19 @@ just launches the app.
 
 ## Run in the browser
 
-There's also a pure-browser version in [`web/`](web/) — same hand tracking,
-same model, but it runs entirely client-side via MediaPipe Tasks Vision. The
-camera feed never leaves the device.
+There's also a browser version — a SvelteKit app in [`app/`](app/). Same hand
+tracking, same model, but it runs entirely client-side via MediaPipe Tasks
+Vision, so the camera feed never leaves the device.
 
 ```bash
-web/serve.sh        # http://localhost:8000/web/
+cd app
+pnpm install
+pnpm dev            # http://localhost:5173
 ```
 
-Open the URL, click **Enable camera**, and draw. It needs to be served over
-`http://localhost` (or HTTPS) — the camera and ES modules won't work from a
-`file://` page. Locally it reuses the `hand_landmarker.task` at the repo root;
-when deployed without it (GitHub Pages, Netlify, Vercel) it falls back to
-fetching the model from the CDN. Press **c** to clear.
+Open the URL, click **Enable camera**, and draw. It's deployed to
+[draw.thoran.art](https://draw.thoran.art) via Cloudflare Workers (`pnpm deploy`
+from `app/`). Press **c** to clear.
 
 ## How it works
 

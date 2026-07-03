@@ -1,6 +1,6 @@
 {
 	"$schema": "./node_modules/wrangler/config-schema.json",
-	"name": "app",
+	"name": "draw",
 	"compatibility_date": "2026-07-03",
 	"compatibility_flags": ["nodejs_als"],
 	"main": ".svelte-kit/cloudflare/_worker.js",
@@ -8,6 +8,7 @@
 		"binding": "ASSETS",
 		"directory": ".svelte-kit/cloudflare"
 	},
+	"routes": [{ "pattern": "draw.thoran.art", "custom_domain": true }],
 	"workers_dev": true,
 	"preview_urls": true
 }
