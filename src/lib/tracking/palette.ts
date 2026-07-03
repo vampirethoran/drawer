@@ -43,8 +43,18 @@ export function resolvePalette(root: Element = document.documentElement): void {
 	}
 }
 
-/** Apply an alpha to an `rgb(r g b)` / `rgb(r,g,b)` string → `rgb(r g b / a)`. */
+/** Apply an alpha to a color string → `rgb(r g b / a)`. Accepts `rgb()`/`rgba()`
+ * and hex (`#rgb`/`#rrggbb`) — the prod CSS minifier rewrites theme colors to hex. */
 export function withAlpha(color: string, alpha: number): string {
+	const hex = color.trim().match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+	if (hex) {
+		let h = hex[1];
+		if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+		const r = parseInt(h.slice(0, 2), 16);
+		const g = parseInt(h.slice(2, 4), 16);
+		const b = parseInt(h.slice(4, 6), 16);
+		return `rgb(${r} ${g} ${b} / ${alpha})`;
+	}
 	const channels = color
 		.replace(/^rgba?\(/, '')
 		.replace(/\).*$/, '')
