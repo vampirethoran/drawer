@@ -44,7 +44,7 @@ Svelte UI**. These are deliberately kept separate:
     stroke layer); left hand sets brush width via a thumb-index pinch and never
     paints. Both are tracked simultaneously.
 
-- **`src/lib/state.svelte.ts`** — the *only* bridge from the loop to the DOM. A
+- **`src/lib/state.svelte.ts`** — the _only_ bridge from the loop to the DOM. A
   single `$state` object (`hud`) that the tracker mutates each frame (fps writes
   are throttled to avoid strobing). Svelte components read `hud.*` and re-render
   only the fixed HUD chrome. Do not add reactive per-frame data flow anywhere

@@ -16,13 +16,8 @@ import type { Category } from '@mediapipe/tasks-vision';
 
 export const clamp = (lo: number, hi: number, v: number) => Math.max(lo, Math.min(hi, v));
 
-export const mapRange = (
-	inLo: number,
-	inHi: number,
-	outLo: number,
-	outHi: number,
-	v: number
-) => (inHi === inLo ? outLo : outLo + ((v - inLo) / (inHi - inLo)) * (outHi - outLo));
+export const mapRange = (inLo: number, inHi: number, outLo: number, outHi: number, v: number) =>
+	inHi === inLo ? outLo : outLo + ((v - inLo) / (inHi - inLo)) * (outHi - outLo);
 
 export function fingerExtended(lm: Hand, tip: number, pip: number): boolean {
 	const wx = lm[WRIST].x;
@@ -72,5 +67,4 @@ export function pinchAmount(lm: Hand): number {
 	return clamp(0, 1, mapRange(PINCH_MIN, PINCH_MAX, 0, 1, norm));
 }
 
-export const widthFromPinch = (amount: number) =>
-	mapRange(0, 1, WIDTH_MIN, WIDTH_MAX, amount);
+export const widthFromPinch = (amount: number) => mapRange(0, 1, WIDTH_MIN, WIDTH_MAX, amount);

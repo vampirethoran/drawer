@@ -88,7 +88,12 @@ export function drawHand(ctx: Ctx, lm: Hand, w: number, h: number, active: boole
 	return pts;
 }
 
-export function drawPinchLink(ctx: Ctx, lm: Hand, w: number, h: number): { thumb: Point; index: Point } {
+export function drawPinchLink(
+	ctx: Ctx,
+	lm: Hand,
+	w: number,
+	h: number
+): { thumb: Point; index: Point } {
 	const thumb: Point = [lm[THUMB_TIP].x * w, lm[THUMB_TIP].y * h];
 	const index: Point = [lm[INDEX_TIP].x * w, lm[INDEX_TIP].y * h];
 	ctx.strokeStyle = palette.accent;
@@ -132,7 +137,16 @@ export function drawLabelChip(
 		ctx.arc(x + padX + dotR, y + th / 2, dotR, 0, Math.PI * 2);
 		ctx.fill();
 	}
-	text(ctx, x + padX + dotGap, y + th / 2, label, size, active ? palette.accent : palette.muted, 'left', 'middle');
+	text(
+		ctx,
+		x + padX + dotGap,
+		y + th / 2,
+		label,
+		size,
+		active ? palette.accent : palette.muted,
+		'left',
+		'middle'
+	);
 }
 
 export function drawWidthMeter(
@@ -150,7 +164,16 @@ export function drawWidthMeter(
 	frostedPanel(ctx, x, y, x + panelW, y + panelH, 16);
 
 	text(ctx, x + 16, y + 14, 'BRUSH', 10, palette.muted, 'left', 'middle');
-	text(ctx, x + panelW - 16, y + 14, `${Math.round(widthPx)} px`, 11, palette.ink, 'right', 'middle');
+	text(
+		ctx,
+		x + panelW - 16,
+		y + 14,
+		`${Math.round(widthPx)} px`,
+		11,
+		palette.ink,
+		'right',
+		'middle'
+	);
 
 	const bx1 = x + 16;
 	const bx2 = x + panelW - 16;
