@@ -21,7 +21,7 @@ MediaPipe WASM runtime are fetched from a CDN — nothing to download by hand.
 ## Deploy
 
 ```bash
-pnpm deploy         # builds, then wrangler deploy → draw.thoran.art
+pnpm release        # builds, then wrangler deploy → draw.thoran.art
 ```
 
 ## How it works
