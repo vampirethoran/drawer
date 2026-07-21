@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    /* the three sizes — every piece of text on every slide uses one */
+    --t1: clamp(2.5rem, 6.5vw, 6.5rem);  /* display */
+    --t2: clamp(1rem, 1.6vw, 1.6rem);    /* mid — body/description */
+    --t3: clamp(0.7rem, 0.85vw, 0.85rem);/* label */
+
+    --ink: #f4f4f2;
+    --dim: #6a6a68;
+    --rule: #1e1e1c;
+    --pad: clamp(2.5rem, 7vw, 9rem);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    background: #000;
+    color: var(--ink);
+    font-family: "Funnel Display", system-ui, sans-serif;
+    font-weight: 300;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    text-wrap: balance;
+  }
+
+  .deck { position: relative; height: 100%; width: 100%; }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    /* vertical padding is much tighter than horizontal — dense slides need the height */
+    padding: clamp(2rem, 6vh, 4.5rem) var(--pad);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: clamp(.8rem, 1.6vh, 1.6rem);
+    /* last-resort: never clip, even on a short window */
+    overflow-y: auto;
+    scrollbar-width: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(12px);
+    transition: opacity .5s ease, transform .5s ease, visibility .5s;
+  }
+  .slide::-webkit-scrollbar { display: none; }
+  .slide[data-active] { opacity: 1; visibility: visible; transform: none; }
+
+  /* ---- the three type roles ---- */
+  .d { font-size: var(--t1); line-height: 0.94; letter-spacing: -0.035em; }
+  .m { font-size: var(--t2); line-height: 1.45; letter-spacing: 0; max-width: 34ch; }
+  .l { font-size: var(--t3); line-height: 1.4; letter-spacing: 0.24em; text-transform: uppercase; color: var(--dim); }
+  .m.full { max-width: 54ch; }
+  .dim { color: var(--dim); }
+
+  /* ---- links ---- */
+  a {
+    color: inherit;
+    text-decoration: underline;
+    /* skip-ink off: at thin weights the gaps read as broken, not delicate */
+    text-decoration-skip-ink: none;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+    text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+    transition: text-decoration-color .25s ease, color .25s ease;
+  }
+  a:hover {
+    color: var(--ink);
+    text-decoration-color: currentColor;
+  }
+  a:focus-visible {
+    outline: 1px solid var(--ink);
+    outline-offset: .25em;
+    text-decoration-color: currentColor;
+  }
+  /* the display size needs a thicker rule and more air to stay proportional */
+  .d a { text-decoration-thickness: 0.02em; text-underline-offset: 0.14em; }
+  /* uppercase labels sit high; tuck the rule closer */
+  .l a { text-underline-offset: 0.3em; }
+
+  /* ---- layout modifiers ---- */
+  .center { align-items: center; text-align: center; }
+  .center .m { max-width: 32ch; }
+  .end { justify-content: flex-end; }
+  /* display:flex so .split also works on a nested div, not just on .slide */
+  .split { display: flex; flex-direction: row; align-items: baseline; gap: clamp(2rem, 6vw, 7rem); }
+  .split > * { flex: 1; }
+  /* opt out of baseline alignment when a column holds a figure, not just text */
+  .split.top { align-items: flex-start; }
+
+  .rule { border: 0; border-top: 1px solid var(--rule); width: 100%; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: clamp(1.5rem, 4vw, 5rem);
+  }
+  .grid > * { display: flex; flex-direction: column; gap: .6rem; }
+  .grid .m { max-width: none; }
+
+  .rows { display: flex; flex-direction: column; }
+  .rows > * {
+    display: grid;
+    grid-template-columns: 5rem 1fr;
+    gap: clamp(1rem, 3vw, 3rem);
+    align-items: baseline;
+    padding: clamp(.6rem, 1.1vw, 1rem) 0;
+    border-top: 1px solid var(--rule);
+  }
+  .rows > *:last-child { border-bottom: 1px solid var(--rule); }
+  .rows .m { max-width: none; }
+
+  /* ---- index: category label in the gutter, names flowing beside it ---- */
+  .index { display: flex; flex-direction: column; }
+  .index > div {
+    display: grid;
+    grid-template-columns: 9rem 1fr;
+    gap: clamp(1rem, 3vw, 3rem);
+    align-items: baseline;
+    padding: clamp(.7rem, 1.4vw, 1.2rem) 0;
+    border-top: 1px solid var(--rule);
+  }
+  .index > div:last-child { border-bottom: 1px solid var(--rule); }
+  /* names sit a step under full ink so the one that matters can outrank them */
+  .index .names {
+    font-size: var(--t2);
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    color: color-mix(in srgb, var(--ink) 60%, #000);
+  }
+  .index .names span:not(:last-child)::after {
+    content: "·";
+    color: var(--dim);
+    margin: 0 .5em;
+  }
+  .index .names .on { color: var(--ink); }
+
+  /* ---- figure: a hairline box around a diagram ---- */
+  .figure {
+    border: 1px solid var(--rule);
+    padding: clamp(1rem, 2.5vw, 2rem);
+    width: 100%;
+    max-width: 30rem;
+  }
+  .figure svg { display: block; width: 100%; height: auto; }
+  .figure .bone { stroke: color-mix(in srgb, var(--ink) 28%, #000); stroke-width: 4; stroke-linecap: round; fill: none; }
+  .figure .joint { fill: var(--ink); }
+  .figure .num { fill: var(--dim); font-size: 26px; letter-spacing: 0; }
+
+  .stack { display: flex; flex-direction: column; gap: clamp(.6rem, 1.4vw, 1.2rem); }
+  .stack .d { line-height: 1.02; }
+
+  blockquote .d { letter-spacing: -0.03em; }
+  blockquote .d::before { content: "“"; margin-left: -0.5em; }
+  blockquote .d::after  { content: "”"; }
+
+  /* ---- chrome ---- */
+  .bar { position: fixed; left: 0; bottom: 0; height: 2px; background: var(--ink); width: 0; transition: width .4s ease; }
+  .count, .hint {
+    position: fixed;
+    bottom: calc(var(--pad) / 2.4);
+    font-size: var(--t3);
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  .count { right: var(--pad); }
+  .hint { left: var(--pad); transition: opacity .6s ease; }
+  .hint.gone { opacity: 0; }
+
+  @media (max-width: 640px) {
+    .split { flex-direction: column; align-items: stretch; }
+    .rows > * { grid-template-columns: 3rem 1fr; }
+    /* stack the label above the names rather than squeezing the gutter */
+    .index > div { grid-template-columns: 1fr; gap: .5rem; }
+    .index > div .l br { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .slide, .bar, .hint { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<main class="deck">
+
+  <!-- 1 · title -->
+  <section class="slide" data-active>
+    <h1 class="d">On ML in visual design, and general fun purposes.</h1>
+    <p class="m">Case in point- <a href="https://draw.thoran.art/" target="_blank">draw.thoran.art</a></p>
+  </section>
+
+  <!-- 3 · label + display + body -->
+  <section class="slide">
+    <h2 class="d">I'm too online and i got bored at work.</h2>
+    <p class="m full">That's how i heard about <a href="https://developers.google.com/edge/mediapipe/solutions/guide" target="_blank">mediapipe.</a> Think of a library of ML models that you can use for some common use cases. Thats it.</p>
+  </section>
+
+  <!-- what's in the box -->
+  <section class="slide">
+    <div class="index">
+      <div>
+        <p class="l">Vision</p>
+        <p class="names">
+          <span>Object detection</span>
+          <span>Image segmentation</span>
+          <span>Gesture recognition</span>
+          <span class="on">Hand landmarks</span>
+          <span>Face landmarks</span>
+          <span>Pose landmarks</span>
+        </p>
+      </div>
+      <div>
+        <p class="l">Text</p>
+        <p class="names">
+          <span>Classification</span>
+          <span>Embedding</span>
+          <span>Language detection</span>
+        </p>
+      </div>
+      <div>
+        <p class="l">Audio</p>
+        <p class="names">
+          <span>Classification</span>
+        </p>
+      </div>
+      <div>
+        <p class="l">On-device<br />gen AI</p>
+        <p class="names">
+          <span>LLM inference</span>
+          <span>RAG</span>
+          <span>Function calling</span>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- how it works · the pipeline -->
+  <section class="slide">
+    <p class="l">Hand landmark detection</p>
+    <h2 class="d">Combination of two more fundamental models</h2>
+    <div class="rows">
+      <div>
+        <span class="l">01</span>
+        <span class="m">A palm detector finds hands and draws a box. It looks for palms rather than whole hands — a palm is a rigid blob, while fingers splay into a thousand shapes.</span>
+      </div>
+      <div>
+        <span class="l">02</span>
+        <span class="m">That crop, scaled to 192 or 224 pixels square, goes to the landmark model.</span>
+      </div>
+      <div>
+        <span class="l">03</span>
+        <span class="m">Out come 21 knuckle coordinates for the hand inside the box.</span>
+      </div>
+      <div>
+        <span class="l">04</span>
+        <span class="m">The next frame skips step one entirely — last frame's landmarks define this frame's crop. The detector only wakes up when tracking fails. This is how it stays performant.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- how it works · the output -->
+  <section class="slide">
+    <div class="split top">
+      <div class="stack">
+        <p class="d">21<br />points.</p>
+        <div class="figure">
+          <svg viewBox="0 0 560 510" role="img" aria-label="MediaPipe hand landmark topology: 21 numbered keypoints from wrist to fingertips">
+            <g class="bone">
+              <!-- thumb -->
+              <path d="M310 472 L228 422 L180 350 L142 293 L88 238" />
+              <!-- index -->
+              <path d="M310 472 L240 238 L222 175 L208 120 L192 62" />
+              <!-- middle -->
+              <path d="M305 228 L305 160 L305 95 L308 32" />
+              <!-- ring -->
+              <path d="M352 246 L368 185 L378 124 L383 65" />
+              <!-- pinky -->
+              <path d="M410 285 L450 244 L472 212 L500 170" />
+              <!-- palm span: 5 → 9 → 13 → 17, closing back to the wrist -->
+              <path d="M240 238 L305 228 L352 246 L410 285 L310 472" />
+            </g>
+            <g class="joint">
+              <circle cx="310" cy="472" r="9" />
+              <circle cx="228" cy="422" r="9" /><circle cx="180" cy="350" r="9" />
+              <circle cx="142" cy="293" r="9" /><circle cx="88"  cy="238" r="9" />
+              <circle cx="240" cy="238" r="9" /><circle cx="222" cy="175" r="9" />
+              <circle cx="208" cy="120" r="9" /><circle cx="192" cy="62"  r="9" />
+              <circle cx="305" cy="228" r="9" /><circle cx="305" cy="160" r="9" />
+              <circle cx="305" cy="95"  r="9" /><circle cx="308" cy="32"  r="9" />
+              <circle cx="352" cy="246" r="9" /><circle cx="368" cy="185" r="9" />
+              <circle cx="378" cy="124" r="9" /><circle cx="383" cy="65"  r="9" />
+              <circle cx="410" cy="285" r="9" /><circle cx="450" cy="244" r="9" />
+              <circle cx="472" cy="212" r="9" /><circle cx="500" cy="170" r="9" />
+            </g>
+            <g class="num">
+              <text x="326" y="497">0</text>
+              <text x="196" y="440">1</text><text x="148" y="372">2</text>
+              <text x="108" y="315">3</text><text x="54"  y="258">4</text>
+              <text x="204" y="266">5</text><text x="188" y="198">6</text>
+              <text x="174" y="143">7</text><text x="156" y="82">8</text>
+              <text x="286" y="266">9</text><text x="258" y="182">10</text>
+              <text x="258" y="118">11</text><text x="261" y="52">12</text>
+              <text x="336" y="284">13</text><text x="384" y="206">14</text>
+              <text x="396" y="148">15</text><text x="401" y="88">16</text>
+              <text x="424" y="312">17</text><text x="458" y="272">18</text>
+              <text x="486" y="236">19</text><text x="514" y="182">20</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+      <div class="stack">
+        <p class="m">Every frame returns three things.</p>
+        <div class="rows">
+          <div>
+            <span class="l">x, y</span>
+            <span class="m">Normalised image coordinates — 0 to 1 across the frame.</span>
+          </div>
+          <div>
+            <span class="l">x, y, z</span>
+            <span class="m">World coordinates in metres, origin at the hand's centre.</span>
+          </div>
+          <div>
+            <span class="l">L / R</span>
+            <span class="m">Handedness, with a confidence score.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- the turn · points → meaning -->
+  <section class="slide">
+    <h2 class="d">The model finds the hand(s). It also measures coordinates. And quite literally nothing else.</h2>
+  </section>
+
+  <!-- the two gestures the app reads -->
+  <section class="slide">
+    <div class="grid">
+      <div>
+        <p class="l">Right hand · draw</p>
+        <p class="m">Index extended, the rest curled. <br>Acts as the brush.</p>
+      </div>
+      <div>
+        <p class="l">Left hand · size</p>
+        <p class="m">Thumb and index pinch. The distance between the two tips sets brush width.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- the kicker · where it all runs -->
+  <section class="slide">
+    <h2 class="d">All of it runs in the browser.</h2>
+    <div class="rows">
+      <div>
+        <span class="l">Runtime</span>
+        <span class="m">MediaPipe ships to the web as one npm package - <a class="dim" href="https://www.npmjs.com/package/@mediapipe/tasks-vision" target="_blank">@mediapipe/tasks-vision</a>. WASM package loads from a CDN and runs on the GPU inside the browser.</span>
+      </div>
+      <div>
+        <span class="l">Model</span>
+        <span class="m">The runtime needs a model. A swappable .task file (a few MB) that Google hosts on a CDN. The browser fetches it once and caches it.</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div class="bar"></div>
+<p class="count"><span id="cur">1</span> / <span id="tot">10</span></p>
+
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  const bar = document.querySelector('.bar');
+  const cur = document.getElementById('cur');
+  document.getElementById('tot').textContent = slides.length;
+
+  let i = 0;
+
+  function show(n) {
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((s, k) => s.toggleAttribute('data-active', k === i));
+    bar.style.width = ((i + 1) / slides.length * 100) + '%';
+    cur.textContent = i + 1;
+    history.replaceState(null, '', '#' + (i + 1));
+  }
+
+  const root = document.documentElement;
+
+  // Safari (and older WebKit) only expose the webkit-prefixed API
+  const isFull = () => document.fullscreenElement || document.webkitFullscreenElement;
+
+  async function fullscreen() {
+    try {
+      if (isFull()) {
+        await (document.exitFullscreen?.() ?? document.webkitExitFullscreen?.());
+      } else {
+        await (root.requestFullscreen?.() ?? root.webkitRequestFullscreen?.());
+      }
+    } catch {
+      /* denied or unsupported — the deck still works windowed */
+    }
+  }
+
+
+  addEventListener('keydown', (e) => {
+    switch (e.key) {
+      case 'ArrowRight': case 'ArrowDown': case 'PageDown': case ' ':
+        e.preventDefault(); show(i + 1); break;
+      case 'ArrowLeft': case 'ArrowUp': case 'PageUp':
+        e.preventDefault(); show(i - 1); break;
+      case 'Home': e.preventDefault(); show(0); break;
+      case 'End': e.preventDefault(); show(slides.length - 1); break;
+      case 'f': case 'F': e.preventDefault(); fullscreen(); break;
+      default: return;
+    }
+  });
+
+  // click: right half forward, left half back — but never hijack a link
+  addEventListener('click', (e) => {
+    if (e.target.closest('a')) return;
+    show(e.clientX > innerWidth / 2 ? i + 1 : i - 1);
+  });
+
+  show((parseInt(location.hash.slice(1), 10) || 1) - 1);
+</script>
+
+</body>
+</html>
